@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package users;
+
+message User {
+  string id = 1;
+  string email = 2;
+  string role = 3;
+  bool status = 4;
+  int64 createdAt = 5;        // epoch millis
+  bytes signature = 6;        // RSA-PSS signature bytes
+  bytes publicKeySpki = 7;    // public key in SPKI DER form
+}
+
+message Users {
+  repeated User users = 1;
+}
