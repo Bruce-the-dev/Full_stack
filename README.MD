@@ -125,27 +125,6 @@ npm run dev -- -p 3001(if started before the backend)
 
 The frontend will run on `http://localhost:3001` (or the next available port)
 
-## 🔧 API Endpoints
-
-### User Management
-
-- `GET /users` - List all users
-- `POST /users` - Create a new user
-  ```json
-  {
-    "email": "user@example.com",
-    "role": "user"
-  }
-  ```
-- `PUT /users/:id` - Update user by ID
-- `DELETE /users/:id` - Delete user by ID
-
-### Protobuf Export
-
-- `GET /users/export` - Export all users in Protobuf format
-  - Returns binary data with cryptographic signatures
-  - Content-Type: `application/octet-stream`
-
 ## 🔐 How It Works
 
 ### 1. User Creation Flow
@@ -267,18 +246,6 @@ message Users {
 
 - **Fix**: Close any database viewers
 - **Fix**: Restart backend server
-
-## 📝 Assignment Requirements Checklist
-
-- ✅ User CRUD operations with SQLite persistence
-- ✅ User graph showing 7-day creation statistics
-- ✅ Protocol Buffers schema defined and implemented
-- ✅ `/users/export` endpoint returning Protobuf data
-- ✅ Frontend decodes Protobuf and displays users
-- ✅ SHA-384 email hashing
-- ✅ RSA-PSS digital signatures (4096-bit)
-- ✅ Frontend signature verification
-- ✅ Only verified users displayed in Protobuf tab
 
 ## 👨‍💻 Author: Mutsinzi Bruce
 

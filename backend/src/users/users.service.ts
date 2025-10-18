@@ -18,7 +18,6 @@ export class UsersService {
   ) {}
 
   async onModuleInit() {
-    // ✅ Use WebCrypto API instead of native crypto
     const keyPair = await subtle.generateKey(
       {
         name: 'RSA-PSS',
@@ -33,7 +32,6 @@ export class UsersService {
     this.privateKey = keyPair.privateKey;
     this.publicKey = keyPair.publicKey;
 
-    // Export public key as DER for storage
     const publicKeyArrayBuffer = await subtle.exportKey('spki', this.publicKey);
     this.publicKeyDer = Buffer.from(publicKeyArrayBuffer);
 
@@ -45,7 +43,6 @@ export class UsersService {
 
     console.log('=== Creating user:', email, '===');
 
-    // ✅ Hash the email using WebCrypto
     const encoder = new TextEncoder();
     const emailBytes = encoder.encode(email);
     const emailHashArrayBuffer = await subtle.digest('SHA-384', emailBytes);
@@ -54,21 +51,19 @@ export class UsersService {
     console.log('Email hash (hex):', emailHash.toString('hex'));
     console.log('Email hash length:', emailHash.length, 'bytes');
 
-    // ✅ Sign using WebCrypto API
     const signatureArrayBuffer = await subtle.sign(
       {
         name: 'RSA-PSS',
-        saltLength: 48, // SHA-384 digest length
+        saltLength: 48,
       },
       this.privateKey,
-      emailBytes, // Sign the original email, not the hash
+      emailBytes,
     );
     const signature = Buffer.from(signatureArrayBuffer);
 
     console.log('Signature length:', signature.length, 'bytes');
     console.log('Public key DER length:', this.publicKeyDer.length, 'bytes');
 
-    // ✅ Verify on backend using WebCrypto
     const backendVerify = await subtle.verify(
       {
         name: 'RSA-PSS',
@@ -115,5 +110,9 @@ export class UsersService {
   async deleteAllUsers() {
     await this.usersRepo.clear();
     return { message: 'all users deleted successfully' };
+  }
+  async emailExists(email: string): Promise<boolean> {
+    const user = await this.usersRepo.findOne({ where: { email } });
+    return !!user;
   }
 }

@@ -32,7 +32,7 @@ export default function Page() {
   useEffect(() => {
     (async () => {
       try {
-        // Load protobuf schema
+
         const root = await protobuf.load("/proto/users.proto");
         const UsersMessage = root.lookupType("users.Users");
 
@@ -65,7 +65,7 @@ export default function Page() {
 
         setUsers(protoUsers);
 
-        // ✅ Fixed helper: properly convert Uint8Array to ArrayBuffer
+        // convert Uint8Array to ArrayBuffer
         function toArrayBuffer(data: Uint8Array | ArrayBuffer | undefined): ArrayBuffer {
           if (!data) {
             throw new Error('Data is undefined');
@@ -73,25 +73,24 @@ export default function Page() {
           if (data instanceof ArrayBuffer) {
             return data;
           }
-          // Create a proper ArrayBuffer from Uint8Array
+          // Create ArrayBuffer from Uint8Array
           const buffer = new ArrayBuffer(data.byteLength);
           const view = new Uint8Array(buffer);
           view.set(data);
           return buffer;
         }
 
-        // ✅ Verify signatures in parallel
+        // Verifying signatures in parallel
         const verifyResults: Record<string, boolean> = {};
         await Promise.all(
           protoUsers.map(async (user) => {
             try {
               console.log("=== Verifying user:", user.email, "===");
 
-              // Encode email to bytes (same as backend)
+              // Encode email to bytes 
               const encoder = new TextEncoder();
               const emailBytes = encoder.encode(user.email);
 
-              // Also compute hash for logging/comparison
               const hash = await crypto.subtle.digest("SHA-384", emailBytes);
 
               console.log("Email bytes length:", emailBytes.length);
@@ -110,19 +109,18 @@ export default function Page() {
               );
               console.log("✓ Public key imported successfully");
 
-              // Export public key to see it (for debugging)
               const exportedKey = await crypto.subtle.exportKey("spki", pubKey);
               console.log("Exported key matches:",
                 Array.from(new Uint8Array(exportedKey)).join(',') ===
                 Array.from(user.publicKeySpki).join(',')
               );
 
-              // ✅ VERIFY AGAINST EMAIL BYTES, NOT HASH!
+              // VERIFY AGAINST EMAIL BYTES
               const valid = await crypto.subtle.verify(
                 { name: "RSA-PSS", saltLength: 48 },
                 pubKey,
                 toArrayBuffer(user.signature),
-                emailBytes  // ✅ Changed from 'hash' to 'emailBytes'
+                emailBytes
               );
 
               console.log(`✓ User ${user.email} signature valid:`, valid);
@@ -139,7 +137,6 @@ export default function Page() {
 
         setVerified(verifyResults);
 
-        // Build chart data (users created per day in the last 7 days)
         const buckets: Record<string, number> = {};
         const now = new Date();
 
@@ -262,8 +259,8 @@ export default function Page() {
                       <tr
                         key={u.id}
                         className={`${isValid
-                            ? "bg-white hover:bg-gray-50"
-                            : "bg-red-50 text-gray-400"
+                          ? "bg-white hover:bg-gray-50"
+                          : "bg-red-50 text-gray-400"
                           }`}
                       >
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">
@@ -280,8 +277,8 @@ export default function Page() {
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                           <span
                             className={`px-2 py-1 rounded-full text-xs font-medium ${u.status
-                                ? "bg-green-100 text-green-800"
-                                : "bg-gray-100 text-gray-800"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-gray-100 text-gray-800"
                               }`}
                           >
                             {u.status ? "Active" : "Inactive"}

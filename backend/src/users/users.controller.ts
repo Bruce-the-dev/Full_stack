@@ -7,6 +7,7 @@ import {
   Put,
   Delete,
   Res,
+  BadRequestException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import type { Response } from 'express';
@@ -31,6 +32,10 @@ export class UsersController {
 
   @Post()
   async create(@Body() body: { email: string; role?: string }) {
+    const exists = await this.usersService.emailExists(body.email);
+    if (exists) {
+      throw new BadRequestException('Email already in use');
+    }
     return this.usersService.createUser(body.email, body.role);
   }
 
