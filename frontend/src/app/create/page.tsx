@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { UserPlus, ArrowLeft } from "lucide-react";
 
 export default function CreateUserPage() {
   const [email, setEmail] = useState("");
@@ -23,83 +24,108 @@ export default function CreateUserPage() {
         body: JSON.stringify({ email, role }),
       });
 
-      if (!response.ok) throw new Error(`Request failed (${response.status})`);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || `Request failed (${response.status})`);
+      }
 
       setStatus("success");
       setMessage("✅ User created successfully! Redirecting...");
       setEmail("");
       setRole("user");
-
-      // ⏳ Redirect back to dashboard after 2 seconds
-      setTimeout(() => {
-        router.push("/");
-      }, 2000);
+      setTimeout(() => router.push("/"), 2000);
     } catch (err) {
       console.error(err);
       setStatus("error");
-      setMessage("❌ Failed to create user. Please try again.");
+      setMessage(err instanceof Error ? err.message : "❌ Failed to create user.");
     }
   }
 
   return (
-    <main className="p-6 flex flex-col items-center justify-center min-h-screen bg-gray-50">
-      <div className="w-full max-w-md bg-white shadow rounded-xl p-6">
-        <h1 className="text-2xl font-bold mb-4 text-center">Create New User</h1>
+    <main className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-6">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-md p-8 border border-gray-100">
+        <div className="mb-4">
+          <Link href="/" className="text-sm text-blue-600 hover:underline flex items-center gap-1">
+            <ArrowLeft size={16} />
+            Back to Dashboard
+          </Link>
+        </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
-          <label className="flex flex-col">
-            <span className="text-sm font-semibold mb-1">Email</span>
+        <div className="flex justify-center mb-4">
+          <div className="bg-blue-100 p-3 rounded-full">
+            <UserPlus className="w-8 h-8 text-blue-600" />
+          </div>
+        </div>
+
+        <h1 className="text-2xl font-bold text-center text-black mb-1">Create New User</h1>
+        <p className="text-center text-gray-600 mb-6">
+          Add a new user with cryptographic signature verification
+        </p>
+
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div>
+            <label className="block text-sm font-semibold text-black mb-2">Email Address</label>
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="border border-gray-300 rounded-md p-2 focus:ring focus:ring-blue-200"
-              placeholder="Enter email"
+              placeholder="user@example.com"
+              disabled={status === "loading"}
+              className="w-full border border-gray-300 rounded-md px-3 py-2 text-black placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:bg-gray-100"
             />
-          </label>
+            <p className="text-xs text-gray-600 mt-1">
+              Hashed with SHA-384 and digitally signed with RSA-PSS
+            </p>
+          </div>
 
-          <label className="flex flex-col">
-            <span className="text-sm font-semibold mb-1">Role</span>
+          <div>
+            <label className="block text-sm font-semibold text-black mb-2">User Role</label>
             <select
               value={role}
               onChange={(e) => setRole(e.target.value)}
-              className="border border-gray-300 rounded-md p-2 focus:ring focus:ring-blue-200"
+              disabled={status === "loading"}
+              className="w-full border border-gray-300 rounded-md px-3 py-2 text-black focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:bg-gray-100"
             >
               <option value="user">User</option>
               <option value="admin">Admin</option>
+              <option value="moderator">Moderator</option>
             </select>
-          </label>
+          </div>
 
           <button
             type="submit"
             disabled={status === "loading"}
-            className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:bg-gray-400"
+            className="w-full flex justify-center items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-md disabled:bg-gray-400 transition"
           >
-            {status === "loading" ? "Creating..." : "Create User"}
+            {status === "loading" ? (
+              <>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
+                Creating...
+              </>
+            ) : (
+              <>
+                <UserPlus className="w-5 h-5" />
+                Create User
+              </>
+            )}
           </button>
         </form>
 
         {message && (
-          <p
-            className={`mt-4 text-center ${status === "success"
-                ? "text-green-600"
-                : status === "error"
-                  ? "text-red-600"
-                  : "text-gray-600"
-              }`}
-          >
+          <p className={`mt-4 text-center text-sm ${status === "success" ? "text-green-600" : "text-red-600"}`}>
             {message}
           </p>
         )}
 
-        <div className="mt-6 text-center">
-          <Link
-            href="/"
-            className="text-blue-600 hover:underline text-sm"
-          >
-            ← Back to Dashboard
-          </Link>
+        <div className="mt-6 pt-6 border-t border-gray-200">
+          <h3 className="text-xs font-semibold text-black mb-2">Security Features</h3>
+          <ul className="space-y-1 text-xs text-gray-700">
+            <li>✓ SHA-384 email hashing</li>
+            <li>✓ RSA-PSS digital signatures (4096-bit)</li>
+            <li>✓ Web Crypto API verification</li>
+            <li>✓ Protocol Buffers serialization</li>
+          </ul>
         </div>
       </div>
     </main>

@@ -1,80 +1,288 @@
-# Fullstack JS Developer Test - QT Global Software Ltd
+# Full-Stack User Management System
 
-This repository contains a reference implementation for the Full-Stack JavaScript developer take-home assignment:
+A modern admin panel built with **Next.js** (frontend) and **NestJS** (backend), featuring cryptographic security with digital signatures, Protocol Buffers serialization, and real-time analytics.
 
-- Backend: NestJS + TypeORM + SQLite
-- Frontend: Next.js + protobuf decoding + client-side signature verification
-- Uses RSA-PSS (4096) + SHA-384 for signing the email hash
+## 🚀 Features
 
-## Structure
+### Core Functionality
 
-- `backend/` — NestJS app (runs on http://localhost:3000)
-- `frontend/` — Next.js app (runs on http://localhost:3001)
-- `users.proto` — Protobuf schema (also in `frontend/public/proto/users.proto`)
+- ✅ **User CRUD Operations** - Create, Read, Update, and Delete users
+- ✅ **Protobuf Serialization** - Efficient binary data encoding using Protocol Buffers
+- ✅ **Digital Signatures** - RSA-PSS signatures with SHA-384 hashing
+- ✅ **Signature Verification** - Frontend verification using Web Crypto API
+- ✅ **Analytics Dashboard** - 7-day user creation chart
+- ✅ **SQLite Database** - Lightweight persistent storage
 
-## Setup
+### Security Features
+
+- 🔒 **SHA-384 Hashing** - Email addresses hashed for secure identification
+- 🔑 **RSA-PSS Signatures** - 4096-bit key pairs for digital signatures
+- ✅ **Frontend Verification** - Signatures verified in browser before display
+- 📦 **Protocol Buffers** - Secure binary serialization format
+
+## 📁 Project Structure
+
+```
+project-root/
+├── backend/                 # NestJS Backend
+│   ├── src/
+│   │   ├── users/
+│   │   │   ├── users.controller.ts
+│   │   │   ├── users.service.ts
+│   │   │   └── entities/user.entity.ts
+│   │   ├── proto/
+│   │   │   └── users.proto
+│   │   |── app.controller.ts
+│   │   |── app.module.ts
+│   │   |── app.service.ts
+│   │   └── main.ts
+│   ├── package.json
+│   └── tsconfig.json
+│
+└── frontend/                # Next.js Frontend
+    ├── src/
+    │   └── app/
+    │       ├── page.tsx     # Main dashboard
+    │       └── create/
+    │           └── page.tsx # Create user page
+    ├── public/
+    │   └── proto/
+    │       └── users.proto
+    ├── package.json
+    └── next.config.js
+```
+
+## 🛠️ Technologies Used
 
 ### Backend
 
+- **NestJS** - Progressive Node.js framework
+- **TypeORM** - Database ORM
+- **SQLite** - Lightweight database
+- **Protocol Buffers** - Binary serialization
+- **Node.js WebCrypto API** - Cryptographic operations
+
+### Frontend
+
+- **Next.js 14** - React framework with App Router
+- **TypeScript** - Type-safe JavaScript
+- **Tailwind CSS** - Utility-first CSS
+- **Chart.js** - Data visualization
+- **Protocol Buffers** - Binary deserialization
+- **Web Crypto API** - Signature verification
+- **Lucide React** - Icon library
+
+## 📦 Installation & Setup
+
+### Prerequisites
+
+- Node.js 18+
+- npm or yarn
+
+### Backend Setup
+
+1. Navigate to the backend directory:
+
 ```bash
 cd backend
-npm install
-# dev server:
-npm run start:dev
-# or build and run:
-npm run build
-npm start
 ```
 
-Backend endpoints:
+2. Install dependencies:
 
-POST /users — create a user (body { "email": "...", "role": "user" })
-
-GET /users — list users (JSON)
-
-GET /users/export — returns protobuf binary Users message (content-type: application/octet-stream)
-
-PUT /users/:id — update user
-
-DELETE /users/:id — delete user
-
-Notes:
-
-A 4096-bit RSA keypair is generated on startup (in-memory). The public key SPKI DER and signature bytes are stored per-user in SQLite.
-
-Database file: db.sqlite (created automatically).
-
-Frontend
-cd frontend
+```bash
 npm install
+```
+
+3. Start the backend server:
+
+```bash
+npm run start:dev
+```
+
+The backend will run on `http://localhost:3000`
+
+### Frontend Setup
+
+1. Navigate to the frontend directory:
+
+```bash
+cd frontend
+```
+
+2. Install dependencies:
+
+```bash
+npm install
+```
+
+3. Start the development server:
+
+```bash
 npm run dev
+```
 
-Open: http://localhost:3001
+The frontend will run on `http://localhost:3001` (or the next available port)
 
-What frontend does:
+## 🔧 API Endpoints
 
-Fetches GET http://localhost:3000/users/export
+### User Management
 
-Decodes protobuf using protobufjs
+- `GET /users` - List all users
+- `POST /users` - Create a new user
+  ```json
+  {
+    "email": "user@example.com",
+    "role": "user"
+  }
+  ```
+- `PUT /users/:id` - Update user by ID
+- `DELETE /users/:id` - Delete user by ID
 
-Verifies each user's signature in the browser using crypto.subtle (RSA-PSS + SHA-384)
+### Protobuf Export
 
-Displays only verified users as ✅ and shows a bar chart of users created in the last 7 days
+- `GET /users/export` - Export all users in Protobuf format
+  - Returns binary data with cryptographic signatures
+  - Content-Type: `application/octet-stream`
 
-Crypto decisions & details
+## 🔐 How It Works
 
-Hash algorithm: SHA-384 (as required)
+### 1. User Creation Flow
 
-Signature algorithm: RSA-PSS
+1. User submits email and role via frontend form
+2. Backend hashes email using SHA-384
+3. Backend signs the email bytes with RSA-PSS (4096-bit key)
+4. User data, signature, and public key stored in SQLite
+5. Success response sent to frontend
 
-Server signs the SHA-384 digest of the email using Node crypto.sign with RSA_PKCS1_PSS_PADDING and saltLength = RSA_PSS_SALTLEN_DIGEST (digest length).
+### 2. Protobuf Export & Verification
 
-Frontend imports public key using importKey('spki', <DER>) and verifies using subtle.verify with saltLength 48 (SHA-384 digest length).
+1. Frontend requests `/users/export` endpoint
+2. Backend serializes users using Protocol Buffers
+3. Frontend decodes Protobuf binary data
+4. For each user:
+   - Frontend hashes the email with SHA-384
+   - Verifies signature using stored public key
+   - Only displays users with valid signatures ✅
 
-Assumptions
+### 3. Protocol Buffers Schema
 
-synchronize: true TypeORM is allowed for this assignment.
+```protobuf
+syntax = "proto3";
 
-For simplicity the backend generates a keypair at startup (if you want persistence across restarts, persist the key to disk).
+package users;
 
-users.proto must be identical in backend & frontend.
+message User {
+  string id = 1;
+  string email = 2;
+  string role = 3;
+  bool status = 4;
+  int64 createdAt = 5;
+  bytes signature = 6;
+  bytes publicKeySpki = 7;
+}
+
+message Users {
+  repeated User users = 1;
+}
+```
+
+## 📊 Dashboard Features
+
+### User Management Tab
+
+- View all users in a table
+- Create new users
+- Edit existing users
+- Delete users
+- Real-time status updates
+
+### Analytics Tab
+
+- Line chart showing user creation trends
+- Last 7 days statistics
+- Day-by-day breakdown
+
+### Protobuf Export Tab
+
+- Fetch and decode Protobuf data
+- Signature verification status for each user
+- Filter out invalid signatures
+- Visual indicators (✅/❌) for verification status
+
+## 🧪 Testing the Application
+
+1. **Create a User**
+
+   - Navigate to the Create User page
+   - Enter an email and select a role
+   - Click "Create User"
+
+2. **Verify on Dashboard**
+
+   - Return to main dashboard
+   - Check "User Management" tab for new user
+   - View chart in "Analytics" tab
+
+3. **Test Protobuf Export**
+   - Click "Protobuf Export" tab
+   - Click "Refresh Protobuf Data"
+   - Verify all users show ✅ (valid signature)
+
+## 🚨 Important Notes
+
+### Database
+
+- SQLite database is created automatically on first run
+- Located at `backend/database.sqlite` (or as configured)
+- Delete the database file to reset all data
+
+### Cryptographic Keys
+
+- RSA keypair is generated in-memory on backend startup
+- Keys are NOT persisted - they regenerate on restart
+- After backend restart, old signatures will be invalid
+- **Solution**: Delete database and create fresh users
+
+### CORS Configuration
+
+- Backend allows requests from `http://localhost:3001`
+- Modify CORS settings in `main.ts` if using different ports
+
+## 🐛 Troubleshooting
+
+### "Invalid signatures" after backend restart
+
+- **Cause**: New keypair generated, old signatures incompatible
+- **Fix**: Delete `database.sqlite` and create new users
+
+### "Failed to fetch users/export"
+
+- **Check**: Backend is running on port 3000
+- **Check**: CORS is properly configured
+- **Check**: Protobuf schema matches on both ends
+
+### Database locked errors
+
+- **Fix**: Close any database viewers
+- **Fix**: Restart backend server
+
+## 📝 Assignment Requirements Checklist
+
+- ✅ User CRUD operations with SQLite persistence
+- ✅ User graph showing 7-day creation statistics
+- ✅ Protocol Buffers schema defined and implemented
+- ✅ `/users/export` endpoint returning Protobuf data
+- ✅ Frontend decodes Protobuf and displays users
+- ✅ SHA-384 email hashing
+- ✅ RSA-PSS digital signatures (4096-bit)
+- ✅ Frontend signature verification
+- ✅ Only verified users displayed in Protobuf tab
+
+## 👨‍💻 Author
+
+Submitted for Full-Stack JavaScript Developer position at QT Global Software Ltd.
+
+---
+
+**Submission Date**: October 19, 2025  
+**Deadline**: 6:00 PM Rwanda Time (UTC+2)
