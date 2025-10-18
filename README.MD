@@ -119,6 +119,8 @@ npm install
 
 ```bash
 npm run dev
+npm run dev -- -p 3001(if started before the backend)
+
 ```
 
 The frontend will run on `http://localhost:3001` (or the next available port)
@@ -233,7 +235,7 @@ message Users {
 ### Database
 
 - SQLite database is created automatically on first run
-- Located at `backend/database.sqlite` (or as configured)
+- Located at `backend/database.sqlite`
 - Delete the database file to reset all data
 
 ### Cryptographic Keys
@@ -278,11 +280,6 @@ message Users {
 - ✅ Frontend signature verification
 - ✅ Only verified users displayed in Protobuf tab
 
-## 👨‍💻 Author
+## 👨‍💻 Author: Mutsinzi Bruce
 
 Submitted for Full-Stack JavaScript Developer position at QT Global Software Ltd.
-
----
-
-**Submission Date**: October 19, 2025  
-**Deadline**: 6:00 PM Rwanda Time (UTC+2)

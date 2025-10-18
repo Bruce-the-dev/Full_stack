@@ -7,7 +7,7 @@
 # Ignore all TypeScript build outputs
 **/dist/
 **/*.tsbuildinfo
-
+**/db.sqlite
 # Next.js build folder
 **/.next/
 **/out/
