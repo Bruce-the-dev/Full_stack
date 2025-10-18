@@ -1,6 +1,6 @@
 # Full-Stack User Management System
 
-A modern admin panel built with **Next.js** (frontend) and **NestJS** (backend), featuring cryptographic security with digital signatures, Protocol Buffers serialization, and real-time analytics.
+A simple modern admin panel built with **Next.js** (frontend) and **NestJS** (backend), featuring cryptographic security with digital signatures, Protocol Buffers serialization, and real-time analytics.
 
 ## 🚀 Features
 
